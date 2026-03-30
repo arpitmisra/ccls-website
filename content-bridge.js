@@ -590,7 +590,7 @@
     var detailGrids = document.querySelectorAll('.pdetail-section .pcard-grid');
     if (!detailGrids.length) return;
 
-    detailGrids[0].innerHTML = categoryPartners.map(function (p) {
+    function cardHtml(p, isSponsor) {
       var logo = p.logo
         ? '<img src="' + safeHtml(p.logo) + '" alt="' + safeHtml(p.name || 'Partner') + '" style="width:100%;height:100%;object-fit:contain;display:block">'
         : safeHtml(partnerInitials(p.name));
@@ -601,9 +601,22 @@
         '<div class="pcard-logo">' + logo + '</div>' +
         '<h4>' + title + '</h4>' +
         '<p>' + safeHtml(p.desc || 'Strategic collaboration with CCLS initiatives.') + '</p>' +
-        '<span class="pcard-tag tag-partner">Partner</span>' +
+        '<span class="pcard-tag ' + (isSponsor ? 'tag-sponsor' : 'tag-partner') + '">' + (isSponsor ? 'Sponsor' : 'Partner') + '</span>' +
       '</div>';
-    }).join('');
+    }
+
+    var partnerItems = categoryPartners.filter(function (p) { return (p.type || 'partner') !== 'sponsor'; });
+    var sponsorItems = categoryPartners.filter(function (p) { return (p.type || 'partner') === 'sponsor'; });
+
+    detailGrids[0].innerHTML = partnerItems.length
+      ? partnerItems.map(function (p) { return cardHtml(p, false); }).join('')
+      : '<div class="pcard"><h4>No partners yet</h4><p>Add partners from the admin portal to show them here.</p><span class="pcard-tag tag-partner">Partner</span></div>';
+
+    if (detailGrids[1]) {
+      detailGrids[1].innerHTML = sponsorItems.length
+        ? sponsorItems.map(function (p) { return cardHtml(p, true); }).join('')
+        : '<div class="pcard"><h4>No sponsors yet</h4><p>Add sponsors from the admin portal to show them here.</p><span class="pcard-tag tag-sponsor">Sponsor</span></div>';
+    }
   }
 
   function applyContact(data) {
