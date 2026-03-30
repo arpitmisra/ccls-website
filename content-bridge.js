@@ -572,6 +572,54 @@
     }
 
     var page = pageName();
+
+    if (page === 'partners.html') {
+      var partnerPreview = partners.filter(function (p) { return (p.type || 'partner') !== 'sponsor'; }).slice(0, 4);
+      var sponsorPreview = partners.filter(function (p) { return (p.type || 'partner') === 'sponsor'; }).slice(0, 4);
+
+      var host = document.querySelector('.partners-cta');
+      if (host) {
+        var previewWrap = document.getElementById('partnersLivePreview');
+        if (!previewWrap) {
+          previewWrap = document.createElement('div');
+          previewWrap.id = 'partnersLivePreview';
+          previewWrap.style.maxWidth = '1100px';
+          previewWrap.style.margin = '46px auto 0';
+          previewWrap.style.padding = '0 24px';
+          host.insertAdjacentElement('afterend', previewWrap);
+        }
+
+        function previewCard(p, isSponsor) {
+          var logo = p.logo
+            ? '<img src="' + safeHtml(p.logo) + '" alt="' + safeHtml(p.name || 'Partner') + '" style="height:24px;max-width:88px;object-fit:contain;display:block">'
+            : '<span style="font-size:.78rem;font-weight:700;letter-spacing:.06em">' + safeHtml(partnerInitials(p.name)) + '</span>';
+          var href = p.url ? safeHtml(p.url) : '#';
+          var extra = p.url ? ' target="_blank" rel="noopener"' : '';
+
+          return '<a href="' + href + '"' + extra + ' style="border:1px solid #e8e8e0;border-radius:8px;padding:12px 14px;background:#fff;text-decoration:none;color:inherit;display:flex;align-items:center;justify-content:space-between;gap:10px">' +
+            '<div style="display:flex;align-items:center;gap:10px;min-width:0">' +
+              '<div style="width:34px;height:34px;border-radius:8px;border:1px solid #ecebe3;background:#f8f7f3;display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0">' + logo + '</div>' +
+              '<div style="min-width:0"><div style="font-size:.82rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:220px">' + safeHtml(p.name || 'Partner') + '</div>' +
+              '<div style="font-size:.66rem;color:#8a8a8a;text-transform:uppercase;letter-spacing:.08em">' + (isSponsor ? 'Sponsor' : 'Partner') + '</div></div>' +
+            '</div>' +
+            '<span style="font-size:.74rem;color:#c8a951">↗</span>' +
+          '</a>';
+        }
+
+        previewWrap.innerHTML =
+          '<div style="display:grid;grid-template-columns:1fr;gap:18px">' +
+            '<div><h3 style="font-family:DM Serif Display,serif;font-size:1.34rem;font-weight:400;color:#1a1a2e;margin:0 0 10px">Live Partners</h3>' +
+            '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px">' +
+              (partnerPreview.length ? partnerPreview.map(function (p) { return previewCard(p, false); }).join('') : '<div style="font-size:.85rem;color:#777">No partners available yet.</div>') +
+            '</div></div>' +
+            '<div><h3 style="font-family:DM Serif Display,serif;font-size:1.34rem;font-weight:400;color:#1a1a2e;margin:0 0 10px">Live Sponsors</h3>' +
+            '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px">' +
+              (sponsorPreview.length ? sponsorPreview.map(function (p) { return previewCard(p, true); }).join('') : '<div style="font-size:.85rem;color:#777">No sponsors available yet.</div>') +
+            '</div></div>' +
+          '</div>';
+      }
+    }
+
     var catMap = {
       'partners-government.html': 'government',
       'partners-academic.html': 'academic',
