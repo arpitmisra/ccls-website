@@ -146,6 +146,32 @@
     if (ct.twitter) document.querySelectorAll('a[aria-label="X"], a[href*="x.com"], a[href*="twitter.com"]').forEach(function (a) { a.href = ct.twitter; });
     if (ct.facebook) document.querySelectorAll('a[aria-label="Facebook"], a[href*="facebook.com"]').forEach(function (a) { a.href = ct.facebook; });
     if (ct.email) document.querySelectorAll('a[href^="mailto:"]').forEach(function (a) { a.href = 'mailto:' + ct.email; });
+
+    var footerCols = Array.prototype.slice.call(document.querySelectorAll('.footer-col'));
+    var connectCol = footerCols.find(function (col) {
+      var h = col.querySelector('h4');
+      return h && h.textContent.trim().toLowerCase() === 'connect';
+    });
+
+    if (connectCol) {
+      var heading = connectCol.querySelector('h4');
+      var connectLinks = [
+        { label: 'Instagram', url: ct.instagram },
+        { label: 'LinkedIn', url: ct.linkedin },
+        { label: 'YouTube', url: ct.youtube },
+        { label: 'X', url: ct.twitter },
+        { label: 'Facebook', url: ct.facebook },
+        { label: 'Email Us', url: ct.email ? ('mailto:' + ct.email) : '' }
+      ].filter(function (x) { return x.url; });
+
+      if (connectLinks.length) {
+        connectCol.innerHTML = (heading ? heading.outerHTML : '<h4>Connect</h4>') +
+          connectLinks.map(function (x) {
+            var external = /^https?:/i.test(x.url);
+            return '<a href="' + safeHtml(x.url) + '"' + (external ? ' target="_blank" rel="noopener"' : '') + '>' + safeHtml(x.label) + '</a>';
+          }).join('');
+      }
+    }
   }
 
   function applyHomepage(data) {
@@ -517,6 +543,69 @@
     if (article.title) document.title = safeHtml(article.title) + ' | CCLS';
   }
 
+  function partnerInitials(name) {
+    var clean = String(name || '').trim();
+    if (!clean) return 'P';
+    var parts = clean.split(/\s+/).filter(Boolean);
+    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+    return (parts[0][0] + parts[1][0]).toUpperCase();
+  }
+
+  function applyPartners(data) {
+    var partners = (data.partners || [])
+      .filter(function (p) { return (p.status || 'active') !== 'inactive'; })
+      .sort(function (a, b) { return (a.order || 999) - (b.order || 999); });
+
+    if (!partners.length) return;
+
+    var marqueeTrack = document.querySelector('.marquee-track');
+    if (marqueeTrack) {
+      var cards = partners.map(function (p) {
+        var logo = p.logo
+          ? '<img src="' + safeHtml(p.logo) + '" alt="' + safeHtml(p.name || 'Partner') + '" style="height:22px;max-width:72px;object-fit:contain">'
+          : '<div class="partner-icon">' + safeHtml(partnerInitials(p.name)) + '</div>';
+        var href = p.url ? safeHtml(p.url) : '#';
+        var extra = p.url ? ' target="_blank" rel="noopener"' : '';
+        return '<a class="partner-logo" href="' + href + '"' + extra + '>' + logo + '<span>' + safeHtml(p.name || 'Partner') + '</span></a>';
+      });
+      marqueeTrack.innerHTML = cards.concat(cards).join('');
+    }
+
+    var page = pageName();
+    var catMap = {
+      'partners-government.html': 'government',
+      'partners-academic.html': 'academic',
+      'partners-industry.html': 'industry',
+      'partners-knowledge.html': 'knowledge'
+    };
+    var targetCategory = catMap[page];
+    if (!targetCategory) return;
+
+    var categoryPartners = partners.filter(function (p) {
+      return String(p.category || '').trim().toLowerCase() === targetCategory;
+    });
+
+    if (!categoryPartners.length) return;
+
+    var detailGrids = document.querySelectorAll('.pdetail-section .pcard-grid');
+    if (!detailGrids.length) return;
+
+    detailGrids[0].innerHTML = categoryPartners.map(function (p) {
+      var logo = p.logo
+        ? '<img src="' + safeHtml(p.logo) + '" alt="' + safeHtml(p.name || 'Partner') + '" style="width:100%;height:100%;object-fit:contain;display:block">'
+        : safeHtml(partnerInitials(p.name));
+      var title = p.url
+        ? '<a href="' + safeHtml(p.url) + '" target="_blank" rel="noopener" style="color:inherit;text-decoration:none">' + safeHtml(p.name || 'Partner') + '</a>'
+        : safeHtml(p.name || 'Partner');
+      return '<div class="pcard">' +
+        '<div class="pcard-logo">' + logo + '</div>' +
+        '<h4>' + title + '</h4>' +
+        '<p>' + safeHtml(p.desc || 'Strategic collaboration with CCLS initiatives.') + '</p>' +
+        '<span class="pcard-tag tag-partner">Partner</span>' +
+      '</div>';
+    }).join('');
+  }
+
   function applyContact(data) {
     var ct = data.contact || {};
     if (!Object.keys(ct).length) return;
@@ -574,6 +663,7 @@
     if (page === 'events.html') applyEvents(data);
     if (page === 'articles.html') applyArticles(data);
     if (page === 'article.html') applyArticleDetail(data);
+    if (page === 'index.html' || page.indexOf('partners') === 0) applyPartners(data);
     if (page === 'contact.html') applyContact(data);
     if (page === 'faculty-team.html') applyOrganogram(data);
   })();
