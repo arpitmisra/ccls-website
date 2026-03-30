@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Article | CCLS</title>
+<script>
+(function(){var t=localStorage.getItem('ccls-theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark')})();
+</script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Libre+Franklin:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#fff;--bg-alt:#f5f5f0;--text:#1a1a2e;--text-muted:#6b6b80;--accent:#1a1a2e;--gold:#c8a951;--border:#e8e8e0;--footer:#1a1a2e;--footer-text:#9a9ab0;--tr:.35s ease}
+  [data-theme="dark"]{--bg:#0f0f1a;--bg-alt:#1a1a2e;--text:#e8e8f0;--text-muted:#9a9ab0;--accent:#e8e8f0;--border:#2d2d5e;--footer:#0a0a14;--footer-text:#6b6b80}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Libre Franklin',sans-serif;background:var(--bg);color:var(--text);line-height:1.75;font-weight:300}
+  nav{position:fixed;top:0;width:100%;z-index:1000;background:#fff;border-bottom:1px solid var(--border)}
+  [data-theme="dark"] nav{background:#0f0f1a}
+  .nav-inner{max-width:1400px;margin:0 auto;padding:0 50px;height:90px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:20px}
+  .nav-brand{display:flex;align-items:center;gap:16px;text-decoration:none}
+  .nav-logo-img{height:56px;width:auto}
+  .nav-brand-text{display:flex;flex-direction:column;line-height:1.15}
+  .nav-brand-text span:first-child{font-family:'DM Serif Display',serif;font-size:1.15rem;color:#1a1a2e}
+  .nav-brand-text span:last-child{font-size:.6rem;letter-spacing:.15em;text-transform:uppercase;color:#6b6b80}
+  .nav-links{display:flex;gap:28px;list-style:none;align-items:center}
+  .nav-links a{text-decoration:none;color:#6b6b80;font-size:.78rem;letter-spacing:.04em;text-transform:uppercase;transition:color var(--tr)}
+  .nav-links a:hover,.nav-links a.active{color:#1a1a2e}
+  [data-theme="dark"] .nav-links a{color:#9a9ab0}
+  [data-theme="dark"] .nav-links a:hover,[data-theme="dark"] .nav-links a.active{color:#e8e8f0}
+  .nav-right{justify-self:end;display:flex;align-items:center;gap:14px}
+  .theme-toggle{background:none;border:none;cursor:pointer;color:#6b6b80;padding:6px;display:flex}
+  .hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;background:none;border:none;padding:5px}
+  .hamburger span{width:22px;height:1.5px;background:#1a1a2e}
+  .mobile-menu{position:fixed;top:90px;left:0;width:100%;background:#fff;border-bottom:1px solid var(--border);padding:24px 50px;display:none;flex-direction:column;gap:16px;z-index:999}
+  .mobile-menu.open{display:flex}
+  .mobile-menu a{text-decoration:none;color:#6b6b80;font-size:.85rem;letter-spacing:.04em;text-transform:uppercase;padding:8px 0;border-bottom:1px solid var(--border)}
+
+  .article-shell{max-width:980px;margin:0 auto;padding:140px 32px 80px}
+  .article-back{display:inline-flex;align-items:center;gap:8px;text-decoration:none;color:var(--text-muted);font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;margin-bottom:22px}
+  .article-back:hover{color:var(--text)}
+  .article-category{font-size:.68rem;letter-spacing:.15em;text-transform:uppercase;color:var(--gold);margin-bottom:12px}
+  .article-title{font-family:'DM Serif Display',serif;font-size:clamp(2rem,4vw,3.2rem);line-height:1.14;font-weight:400;margin-bottom:16px}
+  .article-meta{display:flex;flex-wrap:wrap;gap:16px;color:var(--text-muted);font-size:.82rem;margin-bottom:26px}
+  .article-cover{width:100%;height:360px;background:linear-gradient(135deg,#ecebe3,#f5f4ef);border:1px solid var(--border);margin-bottom:26px;background-size:cover;background-position:center}
+  .article-cover.has-image{border-color:transparent}
+  .article-body{font-size:.98rem;color:var(--text)}
+  .article-body p{margin:0 0 16px;color:var(--text-muted)}
+  .article-external-link{display:inline-flex;text-decoration:none;background:var(--accent);color:#fff;padding:10px 16px;font-size:.74rem;letter-spacing:.06em;text-transform:uppercase;margin-top:6px}
+  .article-footer{margin-top:28px;padding-top:16px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+  .article-author{display:flex;align-items:center;gap:10px}
+  .article-author-photo{width:36px;height:36px;border-radius:50%;overflow:hidden;background:#ecebe3;color:#666;display:flex;align-items:center;justify-content:center;font-size:.78rem;font-weight:600}
+  .article-author-photo img{width:100%;height:100%;object-fit:cover;display:block}
+  .article-author-meta{display:flex;flex-direction:column;line-height:1.2}
+  .article-author-meta strong{font-size:.78rem;font-weight:600}
+  .article-author-meta span{font-size:.7rem;color:var(--text-muted)}
+  .article-comments{display:flex;align-items:center;gap:6px;color:#aaa;font-size:.74rem}
+  .article-comments svg{width:14px;height:14px;stroke:#bbb}
+
+  footer{background:var(--footer);color:var(--footer-text);padding:56px 40px 28px;margin-top:40px}
+  .footer-inner{max-width:1200px;margin:0 auto}
+  .footer-top{display:flex;justify-content:space-between;align-items:start;margin-bottom:34px;flex-wrap:wrap;gap:28px}
+  .footer-brand{display:flex;align-items:center;gap:12px}
+  .footer-brand img{height:48px}
+  .footer-brand p{font-size:.82rem;color:var(--footer-text);margin-top:8px}
+  .footer-links{display:flex;gap:42px}
+  .footer-col h4{font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin-bottom:12px}
+  .footer-col a{display:block;color:var(--footer-text);text-decoration:none;font-size:.82rem;margin-bottom:6px}
+  .footer-bottom{border-top:1px solid rgba(255,255,255,.08);padding-top:20px;text-align:center;font-size:.72rem;opacity:.55}
+
+  @media(max-width:1000px){.nav-links{display:none}.hamburger{display:flex}.nav-inner{grid-template-columns:1fr auto auto;padding:0 24px}}
+  @media(max-width:760px){.article-shell{padding:126px 20px 52px}.article-cover{height:220px}.footer-links{gap:24px;flex-wrap:wrap}}
+</style>
+</head>
+<body>
+<nav>
+  <div class="nav-inner">
+    <a href="index.html" class="nav-brand">
+      <img class="nav-logo-img" src="https://www.dropbox.com/scl/fi/r93n0ixf5x17fvrhs54vh/logo-transparent.png?rlkey=3mylxv0x3akht2f03kg6v6tkg&st=9a8zl0xj&raw=1" alt="CCLS Logo">
+      <div class="nav-brand-text"><span>Corporate and Commercial Law Society</span><span>Campus Law Centre</span></div>
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="faculty-team.html">Organogram</a></li>
+      <li><a href="events.html">Events</a></li>
+      <li><a href="articles.html" class="active">Articles</a></li>
+      <li><a href="partners.html">Partners</a></li>
+      <li><a href="contact.html">Contact Us</a></li>
+    </ul>
+    <div class="nav-right">
+      <button class="theme-toggle" id="themeToggle" aria-label="Toggle Theme">
+        <svg id="icon-moon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+        <svg id="icon-sun" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="display:none"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+      </button>
+      <button class="hamburger" onclick="toggleMenu()" aria-label="Open Menu"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+</nav>
+
+<div class="mobile-menu" id="mobileMenu">
+  <a href="index.html" onclick="closeMenu()">Home</a>
+  <a href="faculty-team.html" onclick="closeMenu()">Organogram</a>
+  <a href="events.html" onclick="closeMenu()">Events</a>
+  <a href="articles.html" onclick="closeMenu()">Articles</a>
+  <a href="partners.html" onclick="closeMenu()">Partners</a>
+  <a href="contact.html" onclick="closeMenu()">Contact Us</a>
+</div>
+
+<main class="article-shell">
+  <a href="articles.html" class="article-back">&larr; Back to Articles</a>
+  <div class="article-category" id="articleMetaCategory">Article</div>
+  <h1 class="article-title" id="articleHeroTitle">Loading article...</h1>
+  <div class="article-meta">
+    <span id="articleMetaAuthor">CCLS Editorial</span>
+    <span id="articleMetaDate">Date TBA</span>
+  </div>
+  <div class="article-cover" id="articleCover"></div>
+  <article class="article-body" id="articleContent">
+    <p>Please wait while we load this article.</p>
+  </article>
+  <div class="article-footer">
+    <div class="article-author">
+      <div class="article-author-photo" id="articleAuthorPhoto">A</div>
+      <div class="article-author-meta"><strong id="articleAuthorName">CCLS Editorial</strong><span id="articleAuthorDate">Date TBA</span></div>
+    </div>
+    <div class="article-comments"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> 0</div>
+  </div>
+</main>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div>
+        <div class="footer-brand">
+          <img src="https://www.dropbox.com/scl/fi/r93n0ixf5x17fvrhs54vh/logo-transparent.png?rlkey=3mylxv0x3akht2f03kg6v6tkg&st=9a8zl0xj&raw=1" alt="CCLS Logo">
+          <div>
+            <h3 style="font-family:'DM Serif Display',serif;font-weight:400;color:#fff">CCLS</h3>
+            <p class="footer-tagline">Corporate & Commercial Law Society</p>
+          </div>
+        </div>
+      </div>
+      <div class="footer-links">
+        <div class="footer-col"><h4>Navigate</h4><a href="index.html">Home</a><a href="faculty-team.html">Organogram</a><a href="events.html">Events</a><a href="articles.html">Articles</a></div>
+        <div class="footer-col"><h4>Resources</h4><a href="publications.html">Publications</a><a href="partners.html">Partners</a><a href="contact.html">Contact</a></div>
+      </div>
+    </div>
+    <div class="footer-bottom">© 2026 Corporate & Commercial Law Society, Campus Law Centre. All rights reserved.</div>
+  </div>
+</footer>
+
+<script>
+function toggleMenu(){document.getElementById('mobileMenu').classList.toggle('open')}
+function closeMenu(){document.getElementById('mobileMenu').classList.remove('open')}
+(function(){
+  var saved = localStorage.getItem('ccls-theme');
+  function syncIcons(){
+    var dark = document.documentElement.getAttribute('data-theme')==='dark';
+    document.getElementById('icon-sun').style.display = dark ? 'block' : 'none';
+    document.getElementById('icon-moon').style.display = dark ? 'none' : 'block';
+  }
+  syncIcons();
+  document.getElementById('themeToggle').addEventListener('click', function(){
+    var dark = document.documentElement.getAttribute('data-theme')==='dark';
+    if(dark){document.documentElement.removeAttribute('data-theme');localStorage.setItem('ccls-theme','light');}
+    else{document.documentElement.setAttribute('data-theme','dark');localStorage.setItem('ccls-theme','dark');}
+    syncIcons();
+  });
+})();
+</script>
+<script src="content-bridge.js"></script>
+</body>
+</html>
