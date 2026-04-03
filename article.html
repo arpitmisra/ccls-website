@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -40,11 +40,22 @@
   .article-category{font-size:.68rem;letter-spacing:.15em;text-transform:uppercase;color:var(--gold);margin-bottom:12px}
   .article-title{font-family:'DM Serif Display',serif;font-size:clamp(2rem,4vw,3.2rem);line-height:1.14;font-weight:400;margin-bottom:16px}
   .article-meta{display:flex;flex-wrap:wrap;gap:16px;color:var(--text-muted);font-size:.82rem;margin-bottom:26px}
+  .article-layout{display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:28px;align-items:start}
+  .article-content{min-width:0}
   .article-cover{width:100%;height:360px;background:linear-gradient(135deg,#ecebe3,#f5f4ef);border:1px solid var(--border);margin-bottom:26px;background-size:cover;background-position:center}
   .article-cover.has-image{border-color:transparent}
   .article-body{font-size:.98rem;color:var(--text)}
   .article-body p{margin:0 0 16px;color:var(--text-muted)}
   .article-external-link{display:inline-flex;text-decoration:none;background:var(--accent);color:#fff;padding:10px 16px;font-size:.74rem;letter-spacing:.06em;text-transform:uppercase;margin-top:6px}
+  .article-author-spotlight{padding:18px;border:1px solid var(--border);background:var(--bg-alt);display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px;position:sticky;top:160px}
+  .article-author-passport{width:72px;height:90px;border:1px solid var(--border);background:#ecebe3;display:flex;align-items:center;justify-content:center;font-size:1.1rem;font-weight:600;color:#666;overflow:hidden}
+  .article-author-passport img{width:100%;height:100%;object-fit:cover;display:block}
+  .article-author-spotlight-name{font-family:'DM Serif Display',serif;font-size:1.2rem;line-height:1.2;font-weight:400;margin:0}
+  .article-linkedin-tag{display:inline-flex;align-items:center;padding:5px 10px;border:1px solid var(--border);border-radius:999px;font-size:.66rem;letter-spacing:.08em;text-transform:uppercase;font-weight:600;text-decoration:none;color:var(--accent);background:var(--bg);transition:all var(--tr)}
+  .article-linkedin-tag:hover{border-color:var(--gold);background:#f7efd9}
+  .article-author-message-wrap{margin-top:2px}
+  .article-author-message-wrap h4{font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin-bottom:6px;font-weight:600}
+  .article-author-message-wrap p{margin:0;color:var(--text-muted);font-size:.9rem;line-height:1.7;text-align:center}
   .article-footer{margin-top:28px;padding-top:16px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
   .article-author{display:flex;align-items:center;gap:10px}
   .article-author-photo{width:36px;height:36px;border-radius:50%;overflow:hidden;background:#ecebe3;color:#666;display:flex;align-items:center;justify-content:center;font-size:.78rem;font-weight:600}
@@ -52,8 +63,7 @@
   .article-author-meta{display:flex;flex-direction:column;line-height:1.2}
   .article-author-meta strong{font-size:.78rem;font-weight:600}
   .article-author-meta span{font-size:.7rem;color:var(--text-muted)}
-  .article-comments{display:flex;align-items:center;gap:6px;color:#aaa;font-size:.74rem}
-  .article-comments svg{width:14px;height:14px;stroke:#bbb}
+  .article-actions{display:flex;align-items:center;gap:8px}
 
   footer{background:var(--footer);color:var(--footer-text);padding:56px 40px 28px;margin-top:40px}
   .footer-inner{max-width:1200px;margin:0 auto}
@@ -67,14 +77,16 @@
   .footer-bottom{border-top:1px solid rgba(255,255,255,.08);padding-top:20px;text-align:center;font-size:.72rem;opacity:.55}
 
   @media(max-width:1000px){.nav-links{display:none}.hamburger{display:flex}.nav-inner{grid-template-columns:1fr auto auto;padding:0 24px}}
+  @media(max-width:980px){.article-layout{grid-template-columns:1fr}.article-author-spotlight{position:static;max-width:320px;margin:0 auto 22px}.article-author-passport{width:64px;height:80px}}
   @media(max-width:760px){.article-shell{padding:126px 20px 52px}.article-cover{height:220px}.footer-links{gap:24px;flex-wrap:wrap}}
 </style>
+<link rel="stylesheet" href="theme-grading.css">
 </head>
 <body>
 <nav>
   <div class="nav-inner">
     <a href="index.html" class="nav-brand">
-      <img class="nav-logo-img" src="https://www.dropbox.com/scl/fi/r93n0ixf5x17fvrhs54vh/logo-transparent.png?rlkey=3mylxv0x3akht2f03kg6v6tkg&st=9a8zl0xj&raw=1" alt="CCLS Logo">
+      <img src="light_theme.png" alt="CCLS Logo" class="nav-logo-img">
       <div class="nav-brand-text"><span>Corporate and Commercial Law Society</span><span>Campus Law Centre</span></div>
     </a>
     <ul class="nav-links">
@@ -112,37 +124,84 @@
     <span id="articleMetaAuthor">CCLS Editorial</span>
     <span id="articleMetaDate">Date TBA</span>
   </div>
-  <div class="article-cover" id="articleCover"></div>
-  <article class="article-body" id="articleContent">
-    <p>Please wait while we load this article.</p>
-  </article>
+  <div class="article-layout">
+    <div class="article-content">
+      <div class="article-cover" id="articleCover"></div>
+      <article class="article-body" id="articleContent">
+        <p>Please wait while we load this article.</p>
+      </article>
+    </div>
+    <aside class="article-author-spotlight">
+      <div class="article-author-passport" id="articleAuthorPassport">A</div>
+      <h3 class="article-author-spotlight-name" id="articleAuthorSpotlightName">CCLS Editorial</h3>
+      <a class="article-linkedin-tag" id="articleAuthorSpotlightLinkedin" href="#" target="_blank" rel="noopener" style="display:none">LinkedIn</a>
+      <div class="article-author-message-wrap" id="articleAuthorMessageWrap" style="display:none">
+        <h4>Message from the author</h4>
+        <p id="articleAuthorMessage"></p>
+      </div>
+    </aside>
+  </div>
   <div class="article-footer">
     <div class="article-author">
       <div class="article-author-photo" id="articleAuthorPhoto">A</div>
       <div class="article-author-meta"><strong id="articleAuthorName">CCLS Editorial</strong><span id="articleAuthorDate">Date TBA</span></div>
     </div>
-    <div class="article-comments"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> 0</div>
+    <div class="article-actions">
+      <a class="article-linkedin-tag" id="articleAuthorLinkedin" href="#" target="_blank" rel="noopener" style="display:none">LinkedIn</a>
+    </div>
   </div>
 </main>
 
+<div class="pre-footer-cta">
+  <div class="pre-footer-cta-inner">
+    <div class="pre-footer-cta-copy">
+      <h2 class="pre-footer-cta-title">Ready to shape your <em>legal career?</em></h2>
+      <p class="pre-footer-cta-text">Membership is open to all students. Join hundreds of future commercial lawyers.</p>
+    </div>
+    <div class="pre-footer-cta-actions">
+      <a class="pre-footer-cta-btn pre-footer-cta-btn-primary" href="contact.html">Join Now - Free</a>
+      <a class="pre-footer-cta-btn pre-footer-cta-btn-secondary" href="contact.html">Get In Touch</a>
+    </div>
+  </div>
+</div>
 <footer>
   <div class="footer-inner">
     <div class="footer-top">
-      <div>
-        <div class="footer-brand">
-          <img src="https://www.dropbox.com/scl/fi/r93n0ixf5x17fvrhs54vh/logo-transparent.png?rlkey=3mylxv0x3akht2f03kg6v6tkg&st=9a8zl0xj&raw=1" alt="CCLS Logo">
-          <div>
-            <h3 style="font-family:'DM Serif Display',serif;font-weight:400;color:#fff">CCLS</h3>
-            <p class="footer-tagline">Corporate & Commercial Law Society</p>
-          </div>
+      <div class="footer-brand-block">
+        <h3 class="footer-title">Corporate &amp; Commercial<br>Law Society</h3>
+        <p class="footer-kicker">Campus Law Centre</p>
+        <p class="footer-about">Dedicated to advancing legal knowledge, professional development, and the pursuit of excellence in commercial law across our campus community.</p>
+      </div>
+      <div class="footer-links-grid">
+        <div class="footer-col">
+          <h4>Navigate</h4>
+          <a href="about.html">About Us</a>
+          <a href="partners.html">Practice Areas</a>
+          <a href="events.html">Events</a>
+          <a href="faculty-team.html">Committee</a>
+          <a href="contact.html">Membership</a>
+        </div>
+        <div class="footer-col">
+          <h4>Resources</h4>
+          <a href="articles.html">Law Review</a>
+          <a href="articles.html">Case Digest</a>
+          <a href="partners-government.html">Pro Bono Clinic</a>
+          <a href="partners-knowledge.html">Mooting Hub</a>
+          <a href="partners-industry.html">Careers Portal</a>
+        </div>
+        <div class="footer-col">
+          <h4>Contact</h4>
+          <a href="mailto:committee@ccls.ac.uk">committee@ccls.ac.uk</a>
+          <a href="https://www.linkedin.com/" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+          <a href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer">Instagram</a>
+          <a href="publications.html">Newsletter</a>
         </div>
       </div>
-      <div class="footer-links">
-        <div class="footer-col"><h4>Navigate</h4><a href="index.html">Home</a><a href="faculty-team.html">Organogram</a><a href="events.html">Events</a><a href="articles.html">Articles</a></div>
-        <div class="footer-col"><h4>Resources</h4><a href="publications.html">Publications</a><a href="partners.html">Partners</a><a href="contact.html">Contact</a></div>
-      </div>
     </div>
-    <div class="footer-bottom">© 2026 Corporate & Commercial Law Society, Campus Law Centre. All rights reserved.</div>
+    <div class="footer-bottom-row">
+      <div class="footer-copy">&copy; 2025 Corporate &amp; Commercial Law Society &nbsp; | &nbsp; Campus Law Centre &nbsp; | &nbsp; All Rights Reserved</div>
+      <div class="footer-note">Designed for Excellence in Legal Education</div>
+    </div>
   </div>
 </footer>
 
@@ -168,3 +227,6 @@ function closeMenu(){document.getElementById('mobileMenu').classList.remove('ope
 <script src="content-bridge.js"></script>
 </body>
 </html>
+
+
+

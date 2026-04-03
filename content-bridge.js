@@ -2,6 +2,9 @@
   'use strict';
 
   var STORE_KEY = 'ccls_content_v1';
+  var LIGHT_THEME_LOGO = 'light_theme.png';
+  var DARK_THEME_LOGO = 'dark_theme.png';
+  var themeLogoObserverBound = false;
 
   function pageName() {
     var p = (window.location.pathname.split('/').pop() || 'index.html').toLowerCase();
@@ -53,6 +56,32 @@
     if (!data) return false;
     return ['events', 'articles', 'partners', 'members', 'media'].some(function (k) {
       return Array.isArray(data[k]) && data[k].length > 0;
+    });
+  }
+
+  function currentThemeLogo() {
+    var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    return isDark ? DARK_THEME_LOGO : LIGHT_THEME_LOGO;
+  }
+
+  function applyThemeAwareLogo() {
+    var logoSrc = currentThemeLogo();
+    document.querySelectorAll('.nav-logo-img, .footer-brand img').forEach(function (img) {
+      img.src = logoSrc;
+    });
+  }
+
+  function bindThemeLogoObserver() {
+    if (themeLogoObserverBound) return;
+    themeLogoObserverBound = true;
+
+    var observer = new MutationObserver(function () {
+      applyThemeAwareLogo();
+    });
+
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['data-theme']
     });
   }
 
@@ -145,7 +174,13 @@
     if (ct.youtube) document.querySelectorAll('a[aria-label="YouTube"], a[href*="youtube.com"]').forEach(function (a) { a.href = ct.youtube; });
     if (ct.twitter) document.querySelectorAll('a[aria-label="X"], a[href*="x.com"], a[href*="twitter.com"]').forEach(function (a) { a.href = ct.twitter; });
     if (ct.facebook) document.querySelectorAll('a[aria-label="Facebook"], a[href*="facebook.com"]').forEach(function (a) { a.href = ct.facebook; });
-    if (ct.email) document.querySelectorAll('a[href^="mailto:"]').forEach(function (a) { a.href = 'mailto:' + ct.email; });
+    if (ct.email) {
+      document.querySelectorAll('a[href^="mailto:"]').forEach(function (a) {
+        a.href = 'mailto:' + ct.email;
+        var label = (a.textContent || '').trim();
+        if (!label || label.indexOf('@') >= 0) a.textContent = ct.email;
+      });
+    }
 
     var footerCols = Array.prototype.slice.call(document.querySelectorAll('.footer-col'));
     var connectCol = footerCols.find(function (col) {
@@ -172,6 +207,9 @@
           }).join('');
       }
     }
+
+    // Keep logos synchronized with the active light/dark theme assets.
+    applyThemeAwareLogo();
   }
 
   function applyHomepage(data) {
@@ -258,6 +296,13 @@
       .split(/\n\s*\n+/)
       .map(function (p) { return '<p>' + safeHtml(p).replace(/\n/g, '<br>') + '</p>'; })
       .join('');
+  }
+
+  function normalizeLinkedinUrl(url) {
+    var value = String(url || '').trim();
+    if (!value) return '';
+    if (!/^https?:\/\//i.test(value)) value = 'https://' + value;
+    return value;
   }
 
   function ensureArticleModal() {
@@ -477,6 +522,10 @@
         var authorAvatar = a.authorImage
           ? '<img src="' + safeHtml(a.authorImage) + '" alt="' + authorName + '" style="width:100%;height:100%;object-fit:cover;display:block">'
           : safeHtml((a.author || 'A').trim().charAt(0).toUpperCase() || 'A');
+        var authorLinkedin = normalizeLinkedinUrl(a.authorLinkedin);
+        var linkedinTag = authorLinkedin
+          ? '<a class="pc-li-tag" href="' + safeHtml(authorLinkedin) + '" target="_blank" rel="noopener" aria-label="Author LinkedIn">LinkedIn</a>'
+          : '<span class="pc-li-tag is-disabled" aria-hidden="true">LinkedIn</span>';
 
         return '<a href="' + safeHtml(articleDetailHref(a.id)) + '" class="pc">' +
           '<div class="pc-img"' + imageStyle + '></div>' +
@@ -493,7 +542,7 @@
                 '<span style="font-size:.64rem;color:#9a9a9a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:155px">' + safeHtml(dateText) + '</span>' +
               '</div>' +
             '</div>' +
-            '<div style="display:flex;align-items:center;gap:6px;flex-shrink:0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> 0</div>' +
+            '<div style="display:flex;align-items:center;gap:6px;flex-shrink:0">' + linkedinTag + '</div>' +
           '</div>' +
         '</a>';
       }).join('');
@@ -515,6 +564,7 @@
     text(document.getElementById('articleMetaDate'), dateText);
     text(document.getElementById('articleAuthorName'), article.author || 'CCLS Editorial');
     text(document.getElementById('articleAuthorDate'), dateText);
+    text(document.getElementById('articleAuthorSpotlightName'), article.author || 'CCLS Editorial');
 
     var cover = document.getElementById('articleCover');
     if (cover && article.image) {
@@ -523,13 +573,51 @@
     }
 
     var photo = document.getElementById('articleAuthorPhoto');
+    var passport = document.getElementById('articleAuthorPassport');
+    var authorFallback = (article.author || 'A').trim().charAt(0).toUpperCase() || 'A';
     if (photo) {
       if (article.authorImage) {
         photo.innerHTML = '<img src="' + safeHtml(article.authorImage) + '" alt="' + safeHtml(article.author || 'Author') + '">';
       } else {
-        photo.textContent = (article.author || 'A').trim().charAt(0).toUpperCase() || 'A';
+        photo.textContent = authorFallback;
       }
     }
+
+    if (passport) {
+      if (article.authorImage) {
+        passport.innerHTML = '<img src="' + safeHtml(article.authorImage) + '" alt="' + safeHtml(article.author || 'Author') + '">';
+      } else {
+        passport.textContent = authorFallback;
+      }
+    }
+
+    var linkedin = document.getElementById('articleAuthorSpotlightLinkedin');
+    var footerLinkedin = document.getElementById('articleAuthorLinkedin');
+    var linkedinUrl = normalizeLinkedinUrl(article.authorLinkedin);
+    if (linkedin) {
+      if (linkedinUrl) {
+        linkedin.href = linkedinUrl;
+        linkedin.style.display = 'inline-flex';
+      } else {
+        linkedin.removeAttribute('href');
+        linkedin.style.display = 'none';
+      }
+    }
+    if (footerLinkedin) {
+      if (linkedinUrl) {
+        footerLinkedin.href = linkedinUrl;
+        footerLinkedin.style.display = 'inline-flex';
+      } else {
+        footerLinkedin.removeAttribute('href');
+        footerLinkedin.style.display = 'none';
+      }
+    }
+
+    var messageWrap = document.getElementById('articleAuthorMessageWrap');
+    var messageEl = document.getElementById('articleAuthorMessage');
+    var authorMessage = String(article.authorMessage || '').trim();
+    if (messageEl) messageEl.textContent = authorMessage;
+    if (messageWrap) messageWrap.style.display = authorMessage ? 'block' : 'none';
 
     var body = document.getElementById('articleContent');
     if (body) {
@@ -556,20 +644,30 @@
       .filter(function (p) { return (p.status || 'active') !== 'inactive'; })
       .sort(function (a, b) { return (a.order || 999) - (b.order || 999); });
 
-    if (!partners.length) return;
+    var stripPartners = partners.length ? partners : [
+      { name: 'Government Partners', url: 'partners-government.html' },
+      { name: 'Academic Partners', url: 'partners-academic.html' },
+      { name: 'Industry Partners', url: 'partners-industry.html' },
+      { name: 'Knowledge Partners', url: 'partners-knowledge.html' }
+    ];
 
-    var marqueeTrack = document.querySelector('.marquee-track');
-    if (marqueeTrack) {
-      var cards = partners.map(function (p) {
+    var marqueeTracks = document.querySelectorAll('.marquee-track');
+    if (marqueeTracks.length) {
+      var cards = stripPartners.map(function (p) {
         var logo = p.logo
           ? '<img src="' + safeHtml(p.logo) + '" alt="' + safeHtml(p.name || 'Partner') + '" style="height:22px;max-width:72px;object-fit:contain">'
-          : '<div class="partner-icon">' + safeHtml(partnerInitials(p.name)) + '</div>';
+          : '<span class="partner-diamond" aria-hidden="true">◆</span>';
         var href = p.url ? safeHtml(p.url) : '#';
         var extra = p.url ? ' target="_blank" rel="noopener"' : '';
         return '<a class="partner-logo" href="' + href + '"' + extra + '>' + logo + '<span>' + safeHtml(p.name || 'Partner') + '</span></a>';
       });
-      marqueeTrack.innerHTML = cards.concat(cards).join('');
+      var cardsHtml = cards.concat(cards).join('');
+      marqueeTracks.forEach(function (track) {
+        track.innerHTML = cardsHtml;
+      });
     }
+
+    if (!partners.length) return;
 
     var page = pageName();
 
@@ -628,6 +726,11 @@
       document.querySelectorAll('.contact-detail div, .ct-item p').forEach(function (el) {
         if ((el.textContent || '').indexOf('@') >= 0) el.textContent = ct.email;
       });
+
+      document.querySelectorAll('.ct-email-link').forEach(function (a) {
+        a.href = 'mailto:' + ct.email;
+        a.textContent = ct.email;
+      });
     }
 
     if (ct.phone) {
@@ -635,21 +738,132 @@
         if (/\+?\d[\d\s-]{6,}/.test(el.textContent || '')) el.textContent = ct.phone;
       });
     }
+
+    var mapUrl = ct.locationMap || ct.map || '';
+    var addressText = ct.address || 'Campus Law Centre, Faculty of Law, University of Delhi';
+    document.querySelectorAll('.ct-location-link').forEach(function (a) {
+      if (mapUrl) a.href = mapUrl;
+      a.textContent = addressText;
+    });
+
+    if (ct.instagram) {
+      document.querySelectorAll('.ct-instagram-link').forEach(function (a) {
+        a.href = ct.instagram;
+      });
+    }
+
+    if (ct.linkedin) {
+      document.querySelectorAll('.ct-linkedin-link').forEach(function (a) {
+        a.href = ct.linkedin;
+      });
+    }
+
+    var form = document.getElementById('ctContactForm');
+    if (!form || form.dataset.mailtoBound === '1') return;
+    form.dataset.mailtoBound = '1';
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+
+      var to = (ct.formEmail || ct.email || 'ccls@clc.du.ac.in').trim();
+      if (!to) return;
+
+      var firstName = (document.getElementById('ctFirstName') || {}).value || '';
+      var lastName = (document.getElementById('ctLastName') || {}).value || '';
+      var senderEmail = (document.getElementById('ctSenderEmail') || {}).value || '';
+      var subjectInput = (document.getElementById('ctSubject') || {}).value || '';
+      var message = (document.getElementById('ctMessage') || {}).value || '';
+
+      var fullName = (firstName + ' ' + lastName).trim();
+      var subject = subjectInput || 'Website Contact Form Submission';
+      var bodyLines = [
+        'Name: ' + (fullName || 'N/A'),
+        'Email: ' + (senderEmail || 'N/A'),
+        '',
+        'Message:',
+        message || 'N/A'
+      ];
+
+      var mailto = 'mailto:' + encodeURIComponent(to) +
+        '?subject=' + encodeURIComponent(subject) +
+        '&body=' + encodeURIComponent(bodyLines.join('\n'));
+
+      window.location.href = mailto;
+    });
   }
 
   function applyOrganogram(data) {
     var members = (data.members || []).slice().sort(function (a, b) { return (a.order || 99) - (b.order || 99); });
-    if (!members.length) return;
+
+    function linkedinTag(url) {
+      var href = (url || '').trim() || '#';
+      var attrs = href === '#'
+        ? 'href="#"'
+        : 'href="' + safeHtml(href) + '" target="_blank" rel="noopener"';
+      return '<a class="cas-linkedin-tag" ' + attrs + '>LinkedIn</a>';
+    }
+
+    function ensureOrganogramLinkedinTags() {
+      document.querySelectorAll('.cas-card .cas-info').forEach(function (info) {
+        if (info.querySelector('.cas-linkedin-tag')) return;
+        var card = info.closest('.cas-card');
+        var url = (card && card.getAttribute('data-linkedin')) || '';
+        info.insertAdjacentHTML('beforeend', linkedinTag(url));
+      });
+    }
+
+    function renderTeacherConveners() {
+      var allSections = document.querySelectorAll('.cas-team-section');
+      var topSection = allSections[0];
+      if (!topSection) return;
+
+      var teacherConveners = members.filter(function (m) {
+        var tier = (m.tier || '').toLowerCase();
+        return tier === 'teacher conveners' || tier === 'teacher committe' || tier === 'teacher committee';
+      });
+
+      if (!teacherConveners.length) {
+        ensureOrganogramLinkedinTags();
+        return;
+      }
+
+      var header = topSection.querySelector('.cas-team-header');
+      var html = '';
+      html += '<div class="cas-tier-label">Teacher Committee</div>';
+      html += '<div class="cas-team-grid cas-team-grid-3" style="max-width:900px;margin:0 auto 40px">';
+      html += teacherConveners.map(function (m) {
+        var avatar = m.photo
+          ? '<img src="' + safeHtml(m.photo) + '" alt="' + safeHtml(m.name || 'Teacher Committee') + '">'
+          : safeHtml((m.name || 'T').charAt(0));
+        return '<div class="cas-card"' + (m.linkedin ? ' data-linkedin="' + safeHtml(m.linkedin) + '"' : '') + '><div class="cas-photo">' + avatar + '</div><div class="cas-info"><div class="cas-role">Teacher Committee</div><div class="cas-name">' + safeHtml(m.name || '') + '</div>' + linkedinTag(m.linkedin) + '</div></div>';
+      }).join('');
+      html += '</div>';
+
+      topSection.innerHTML = (header ? header.outerHTML : '') + html;
+    }
+
+    if (!members.length) {
+      ensureOrganogramLinkedinTags();
+      return;
+    }
+
+    renderTeacherConveners();
 
     var teamSection = document.querySelectorAll('.cas-team-section')[1];
     if (!teamSection) return;
 
     var grouped = {};
     members.forEach(function (m) {
+      if (((m.tier || '').toLowerCase() === 'teacher conveners' || (m.tier || '').toLowerCase() === 'teacher committe' || (m.tier || '').toLowerCase() === 'teacher committee')) return;
       var tier = m.tier || 'Team';
       if (!grouped[tier]) grouped[tier] = [];
       grouped[tier].push(m);
     });
+
+    if (!Object.keys(grouped).length) {
+      ensureOrganogramLinkedinTags();
+      return;
+    }
 
     var html = '';
     Object.keys(grouped).forEach(function (tier) {
@@ -657,16 +871,20 @@
       html += '<div class="cas-team-grid" style="max-width:1000px;margin:0 auto 40px">';
       html += grouped[tier].map(function (m) {
         var avatar = m.photo ? '<img src="' + safeHtml(m.photo) + '" alt="' + safeHtml(m.name || 'Member') + '">' : safeHtml((m.name || 'M').charAt(0));
-        return '<div class="cas-card"><div class="cas-photo">' + avatar + '</div><div class="cas-info"><div class="cas-role">' + safeHtml(m.role || 'Member') + '</div><div class="cas-name">' + safeHtml(m.name || '') + '</div></div></div>';
+        return '<div class="cas-card"' + (m.linkedin ? ' data-linkedin="' + safeHtml(m.linkedin) + '"' : '') + '><div class="cas-photo">' + avatar + '</div><div class="cas-info"><div class="cas-role">' + safeHtml(m.role || 'Member') + '</div><div class="cas-name">' + safeHtml(m.name || '') + '</div>' + linkedinTag(m.linkedin) + '</div></div>';
       }).join('');
       html += '</div>';
     });
 
     var header = teamSection.querySelector('.cas-team-header');
     teamSection.innerHTML = (header ? header.outerHTML : '') + html;
+    ensureOrganogramLinkedinTags();
   }
 
   (async function init() {
+    bindThemeLogoObserver();
+    applyThemeAwareLogo();
+
     var data = await getData();
     if (!data || typeof data !== 'object') return;
 
